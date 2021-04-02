@@ -45,6 +45,10 @@
    
    
    // YOUR CODE HERE
+   $pc[31:0] = >>1$next_pc[31:0];
+   $next_pc[31:0] = reset ? 0 : $pc + 1;
+   
+   `READONLY_MEM($pc, $$instr[31:0]);
    // ...
    
    
