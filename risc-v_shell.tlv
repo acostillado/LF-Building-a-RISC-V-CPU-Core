@@ -46,9 +46,49 @@
    
    // YOUR CODE HERE
    $pc[31:0] = >>1$next_pc[31:0];
-   $next_pc[31:0] = reset ? 0 : $pc + 1;
+   $next_pc[31:0] = reset ? 0 : $pc + 4;
    
    `READONLY_MEM($pc, $$instr[31:0]);
+   
+   $is_i_instr = ( $instr[6:2] == 5'd0 ) ||
+                 ( $instr[6:2] == 5'd1 ) ||
+                 ( $instr[6:2] == 5'd4 ) ||
+                 ( $instr[6:2] == 5'd6 ) ||
+                 ( $instr[6:2] == 5'd24 );
+                 
+   
+   $is_r_instr = ( $instr[6:2] == 5'd11 ) ||
+                 ( $instr[6:2] == 5'd12 ) ||
+                 ( $instr[6:2] == 5'd14 ) ||
+                 ( $instr[6:2] == 5'd21 );
+                 
+                 
+   $is_s_instr = ( $instr[6:5] == 2'b01 ) && ( $instr[4:2] ==? 3'b00x);
+   
+   $is_b_instr = $instr[6:2] == 5'b11000;
+   
+   $is_u_instr = $instr[6:2] ==? 5'b0x101;
+   
+   $is_j_instr = $instr[6:2] == 5'b11011;
+   
+   // Instruction fields
+   
+   $func7[6:0] = $instr[31:25];
+   $rs2[4:0] = $instr[24:20];
+   $rs1[4:0] = $instr[19:15];
+   $func3[2:0] = $instr[14:12];
+   $rd[4:0] = $instr[11:7];
+   $opcode[6:0] = $instr[6:0];
+   
+   // Valid signals
+   $func7_valid = $is_r_instr;
+   $rs2_valid = $is_r_instr || $is_s_instr || $is_b_instr;
+   $rs1_valid = $is_r_instr;
+   $func3_valid = ! $is_u_instr || ! $is_j_instr;
+   $rd_valid = ! $is_u_instr || ! $is_j_instr;
+   
+   $imm_valid = ! $is_r_instr;
+   
    // ...
    
    
