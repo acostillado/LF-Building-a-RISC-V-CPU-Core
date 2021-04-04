@@ -50,7 +50,8 @@
    // YOUR CODE HERE
    $pc[31:0] = >>1$next_pc[31:0];
    $next_pc[31:0] = $reset ? 0 : 
-                    $taken_br ? $br_tgt_pc :
+                    $taken_br ? $br_tgt_pc   :
+                    $is_jalr  ? $jalr_tgt_pc :
                     $pc + 4;
    
    `READONLY_MEM($pc, $$instr[31:0]);
@@ -59,7 +60,7 @@
                  ( $instr[6:2] == 5'd1 ) ||
                  ( $instr[6:2] == 5'd4 ) ||
                  ( $instr[6:2] == 5'd6 ) ||
-                 ( $instr[6:2] == 5'd23 );
+                 ( $instr[6:2] == 5'd25 );
                  
    
    $is_r_instr = ( $instr[6:2] == 5'd11 ) ||
@@ -193,9 +194,14 @@
                $is_bge &&  ( ( $src1_value == $src2_value) ^ $ext_sig ) ? 1'b1 :
                $is_bltu && ( $src1_value <  $src2_value) ? 1'b1 :
                $is_bgeu && ( $src1_value >= $src2_value) ? 1'b1 :
+               $is_jal ? 1'b1 :
                1'b0;
                
    $br_tgt_pc[31:0] = $pc + $imm;
+   
+   // Jumping
+   
+   $jalr_tgt_pc[31:0] = $src1_value + $imm;
    
    // Assert these to end simulation (before Makerchip cycle limit).
    *passed = 1'b0;
