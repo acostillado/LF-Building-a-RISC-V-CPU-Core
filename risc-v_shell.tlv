@@ -130,22 +130,22 @@
    $is_srli  = $dec_bits == 11'b0_101_0010011;
    $is_srai  = $dec_bits == 11'b1_101_0010011;
    //add
-   $is_sub   = $dec_bits == 11'b1_000_0010011;
-   $is_sll   = $dec_bits == 11'b0_001_0010011;
-   $is_slt   = $dec_bits == 11'b0_010_0010011;
-   $is_sltu  = $dec_bits == 11'b0_011_0010011;
-   $is_xor   = $dec_bits == 11'b0_100_0010011;
-   $is_srl   = $dec_bits == 11'b0_101_0010011;
-   $is_sra   = $dec_bits == 11'b1_101_0010011;
-   $is_or    = $dec_bits == 11'b0_110_0010011;
-   $is_and   = $dec_bits == 11'b0_111_0010011;
+   $is_sub   = $dec_bits == 11'b1_000_0110011;
+   $is_sll   = $dec_bits == 11'b0_001_0110011;
+   $is_slt   = $dec_bits == 11'b0_010_0110011;
+   $is_sltu  = $dec_bits == 11'b0_011_0110011;
+   $is_xor   = $dec_bits == 11'b0_100_0110011;
+   $is_srl   = $dec_bits == 11'b0_101_0110011;
+   $is_sra   = $dec_bits == 11'b1_101_0110011;
+   $is_or    = $dec_bits == 11'b0_110_0110011;
+   $is_and   = $dec_bits == 11'b0_111_0110011;
    
    $is_load = $opcode[6:0] == 7'b0000011;
    
    // Subexpresions for the ALU
    // SLTU and SLTI (set if less than, unsigned)
-   $sltu_rslt[31:0] = {31'b0, $src1_value < $src2_value};
-   $sltu_rslt[31:0] = {31'b0, $src1_value < $imm};
+   $sltu_rslt[31:0]  = {31'b0, $src1_value < $src2_value};
+   $sltiu_rslt[31:0] = {31'b0, $src1_value < $imm};
    // SRA and SRAI (shift right, arithmetic) results:
    // sign-extended src1
    $sext_src1[63:0] = { {32{$src1_value[31]}}, $src1_value };
