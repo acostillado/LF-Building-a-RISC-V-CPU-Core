@@ -49,7 +49,9 @@
    
    // YOUR CODE HERE
    $pc[31:0] = >>1$next_pc[31:0];
-   $next_pc[31:0] = reset ? 0 : $pc + 4;
+   $next_pc[31:0] = $reset ? 0 : 
+                    $taken_br ? $br_tgt_pc :
+                    $pc + 4;
    
    `READONLY_MEM($pc, $$instr[31:0]);
    
@@ -57,13 +59,13 @@
                  ( $instr[6:2] == 5'd1 ) ||
                  ( $instr[6:2] == 5'd4 ) ||
                  ( $instr[6:2] == 5'd6 ) ||
-                 ( $instr[6:2] == 5'd24 );
+                 ( $instr[6:2] == 5'd23 );
                  
    
    $is_r_instr = ( $instr[6:2] == 5'd11 ) ||
                  ( $instr[6:2] == 5'd12 ) ||
                  ( $instr[6:2] == 5'd14 ) ||
-                 ( $instr[6:2] == 5'd21 );
+                 ( $instr[6:2] == 5'd20 );
                  
                  
    $is_s_instr = ( $instr[6:5] == 2'b01 ) && ( $instr[4:2] ==? 3'b00x);
@@ -86,15 +88,17 @@
    // Valid signals
    $func7_valid = $is_r_instr;
    $rs2_valid = $is_r_instr || $is_s_instr || $is_b_instr;
-   $rs1_valid = $is_r_instr;
+   $rs1_valid = $is_r_instr || $is_s_instr || $is_b_instr || $is_i_instr;
    $func3_valid = ! $is_u_instr || ! $is_j_instr;
-   $rd_valid = $rd[4:0] == 5'b0 ? 1'b0 : ! $is_u_instr || ! $is_j_instr ;
+   $rd_valid = $rd[4:0] == 5'b0 ? 1'b0 : !$is_s_instr && !$is_b_instr ;
    
    $imm_valid = ! $is_r_instr;
    
+   $hola[31:0] = { {20{$instr[31]}}, $instr[7], $instr[30:25], $instr[11:8], 1'b0 };
+   
    $imm[31:0] = $is_i_instr ? { {21{$instr[31]}},  $instr[30:20]  } :
                 $is_s_instr ? { {21{$instr[31]}},  $instr[30:25], $instr[11:7] } :
-                $is_b_instr ? { {20{$instr[31]}},  $instr[7], $instr[30:25], $instr[11:8], 1'b0 } :
+                $is_b_instr ? { {20{$instr[31]}}, $instr[7], $instr[30:25], $instr[11:8], 1'b0 } :
                 $is_u_instr ? { {$instr[31:12]}, 12'b0 } :
                 $is_j_instr ? { {12{$instr[31]}}, $instr[19:12], $instr[20], $instr[30:21], 1'b0  } :
                 32'b0;
@@ -116,7 +120,19 @@
                    $is_add ? $src1_value + $src2_value :
                    32'b0;
                    
+   // Branching
    
+   $ext_sig = ( $src1_value[31] != $src2_value[31] );
+   
+   $taken_br = $is_beq &&  ( $src1_value == $src2_value) ? 1'b1 :
+               $is_bne &&  ( $src1_value != $src2_value) ? 1'b1 :
+               $is_blt &&  ( ( $src1_value <  $src2_value) ^ $ext_sig ) ? 1'b1 :
+               $is_bge &&  ( ( $src1_value == $src2_value) ^ $ext_sig ) ? 1'b1 :
+               $is_bltu && ( $src1_value <  $src2_value) ? 1'b1 :
+               $is_bgeu && ( $src1_value >= $src2_value) ? 1'b1 :
+               1'b0;
+               
+   $br_tgt_pc[31:0] = $pc + $imm;
    
    // Assert these to end simulation (before Makerchip cycle limit).
    *passed = 1'b0;
